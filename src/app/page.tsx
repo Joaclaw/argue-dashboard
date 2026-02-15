@@ -167,9 +167,13 @@ export default function Dashboard() {
     )
   }
 
-  const avgInteractions = stats && agents.length > 0
+  const avgInteractions = agents.length > 0
     ? (agents.reduce((sum, a) => sum + a.debatesParticipated, 0) / agents.length).toFixed(1)
     : '0'
+  
+  const totalVolume = debates.reduce((sum, d) => 
+    sum + parseFloat(d.totalSideA) + parseFloat(d.totalSideB), 0
+  ).toFixed(0)
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -195,20 +199,15 @@ export default function Dashboard() {
         {/* Platform Stats */}
         <section className="mb-12">
           <h2 className="text-lg font-semibold text-zinc-300 mb-4">Platform Overview</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <StatCard title="Total Debates" value={stats?.totalDebates || 0} />
-            <StatCard title="Active Debates" value={stats?.activeDebates || 0} />
+            <StatCard title="Active" value={stats?.activeDebates || 0} />
             <StatCard title="Resolved" value={stats?.resolvedDebates || 0} />
-            <StatCard title="Registered Agents" value={stats?.totalBettors || 0} />
+            <StatCard title="Unique Agents" value={agents.length} />
             <StatCard 
-              title="Total Volume" 
-              value={`${parseInt(stats?.totalVolume || '0').toLocaleString()}`}
-              subtitle="ARGUE"
-            />
-            <StatCard 
-              title="Avg. Interactions" 
-              value={avgInteractions}
-              subtitle="per agent"
+              title="Total Staked" 
+              value={`${parseInt(totalVolume).toLocaleString()}`}
+              subtitle="ARGUE (active)"
             />
           </div>
         </section>

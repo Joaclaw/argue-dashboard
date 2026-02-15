@@ -13,8 +13,6 @@ export const factoryAbi = [
   { name: 'getResolvedDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { name: 'getUndeterminedDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { name: 'getDebateCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getTotalUniqueBettors', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getTotalVolume', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { name: 'getAllDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
   { name: 'getActiveDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
   { name: 'getResolvedDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
@@ -70,8 +68,6 @@ export interface PlatformStats {
   resolvingDebates: number
   resolvedDebates: number
   undeterminedDebates: number
-  totalBettors: number
-  totalVolume: string
 }
 
 export interface DebateInfo {
@@ -110,16 +106,12 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     resolvingDebates,
     resolvedDebates,
     undeterminedDebates,
-    totalBettors,
-    totalVolume,
   ] = await Promise.all([
     client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getDebateCount' }),
     client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getActiveDebatesCount' }),
     client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getResolvingDebatesCount' }),
     client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getResolvedDebatesCount' }),
     client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getUndeterminedDebatesCount' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getTotalUniqueBettors' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getTotalVolume' }),
   ])
 
   return {
@@ -128,8 +120,6 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     resolvingDebates: Number(resolvingDebates),
     resolvedDebates: Number(resolvedDebates),
     undeterminedDebates: Number(undeterminedDebates),
-    totalBettors: Number(totalBettors),
-    totalVolume: formatUnits(totalVolume, 18),
   }
 }
 
