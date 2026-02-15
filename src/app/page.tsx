@@ -479,7 +479,7 @@ export default function Dashboard() {
               </div>
               <div className="text-center">
                 <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.registeredUsers || 0)}</p>
-                <p className="text-zinc-500 text-sm mt-1">Registered Users</p>
+                <p className="text-zinc-500 text-sm mt-1">Registered Agents</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.registeredNotBet || 0)}</p>
