@@ -57,9 +57,10 @@ export const debateAbi = [
 ] as const
 
 // Create client
+const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://mainnet.base.org'
 export const client = createPublicClient({
   chain: base,
-  transport: http('https://mainnet.base.org'),
+  transport: http(rpcUrl),
 })
 
 // Types
