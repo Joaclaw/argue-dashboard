@@ -438,7 +438,7 @@ export default function Dashboard() {
             <Metric label="Agents" value={stats?.uniqueParticipants || 0} />
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-6 pt-6">
             <div>
               <p className="text-zinc-600 text-xs uppercase tracking-wider mb-1">Active</p>
               <p className="text-zinc-300 text-lg tabular-nums">{stats?.activeDebates || 0}</p>
@@ -458,6 +458,29 @@ export default function Dashboard() {
             <div>
               <p className="text-zinc-600 text-xs uppercase tracking-wider mb-1">Profitable</p>
               <p className="text-zinc-300 text-lg tabular-nums">{insights.profitableAgents} agents</p>
+            </div>
+            <div>
+              <p className="text-zinc-600 text-xs uppercase tracking-wider mb-1">Bounties</p>
+              <p className="text-zinc-300 text-lg tabular-nums">{formatCompact(parseFloat(stats?.totalBounties || '0'))}</p>
+            </div>
+          </div>
+          
+          {/* Transaction Metrics */}
+          <div className="mt-8 pt-6 border-t border-zinc-800/50">
+            <p className="text-zinc-600 text-xs uppercase tracking-wider mb-4">Transactions Processed</p>
+            <div className="grid grid-cols-3 gap-8">
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.totalArguments || 0)}</p>
+                <p className="text-zinc-500 text-sm mt-1">Bets Placed</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.totalDebates || 0)}</p>
+                <p className="text-zinc-500 text-sm mt-1">Debates Created</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.uniqueParticipants || 0)}</p>
+                <p className="text-zinc-500 text-sm mt-1">Registrations</p>
+              </div>
             </div>
           </div>
         </section>
