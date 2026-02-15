@@ -5,6 +5,11 @@ import { base } from 'viem/chains'
 export const FACTORY_ADDRESS = '0x0692eC85325472Db274082165620829930f2c1F9' as const
 export const READER_ADDRESS = '0xeA28C45B8ee9DA8c4343D964dDA9faf5109d478A' as const
 export const ARGUE_TOKEN = '0x7FFd8f91b0b1b5c7A2E6c7c9efB8Be0A71885b07' as const
+export const LOCKED_ARGUE = '0x2FA376c24d5B7cfAC685d3BB6405f1af9Ea8EE40' as const
+
+// Transfer event signature
+const TRANSFER_EVENT = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' as const
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000000000000000000000000000' as const
 
 // Factory ABI (minimal for getAllDebates)
 export const factoryAbi = [
@@ -121,6 +126,8 @@ export interface PlatformStats {
   totalBounties: string
   totalArguments: number
   uniqueParticipants: number
+  registeredUsers: number
+  registeredNotBet: number
 }
 
 export interface DebateInfo {
@@ -145,6 +152,40 @@ export interface AgentStats {
   winRate: number
   totalArgumentsWritten: number
   totalAmountBet: string
+}
+
+// Fetch registered users (recipients of LockedARGUE mints = signup bonuses)
+async function getRegisteredUsers(): Promise<Set<string>> {
+  try {
+    const logs = await client.getLogs({
+      address: LOCKED_ARGUE,
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { type: 'address', indexed: true, name: 'from' },
+          { type: 'address', indexed: true, name: 'to' },
+          { type: 'uint256', indexed: false, name: 'value' },
+        ],
+      },
+      args: {
+        from: '0x0000000000000000000000000000000000000000' as Address, // Mints only
+      },
+      fromBlock: BigInt(26000000),
+      toBlock: 'latest',
+    })
+    
+    const registered = new Set<string>()
+    for (const log of logs) {
+      if (log.args.to) {
+        registered.add((log.args.to as string).toLowerCase())
+      }
+    }
+    return registered
+  } catch (err) {
+    console.error('Failed to fetch registered users:', err)
+    return new Set()
+  }
 }
 
 // Fetch all data using the reader contract
@@ -203,6 +244,13 @@ export async function fetchDashboardData() {
       })
     : []
 
+  // Get registered users (from LockedARGUE mints)
+  const registeredSet = await getRegisteredUsers()
+  const bettorSet = new Set(participants.map(p => p.toLowerCase()))
+  
+  // Registered but haven't bet yet
+  const registeredNotBet = [...registeredSet].filter(addr => !bettorSet.has(addr)).length
+
   // Format data
   const stats: PlatformStats = {
     totalDebates: Number(platformStats.totalDebates),
@@ -214,6 +262,8 @@ export async function fetchDashboardData() {
     totalBounties: formatUnits(totalBounties, 18),
     totalArguments: Number(totalArguments),
     uniqueParticipants: Number(uniqueParticipants),
+    registeredUsers: registeredSet.size,
+    registeredNotBet: registeredNotBet,
   }
 
   const debates: DebateInfo[] = debateInfos.map(d => ({

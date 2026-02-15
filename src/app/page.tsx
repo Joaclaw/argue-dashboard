@@ -468,7 +468,7 @@ export default function Dashboard() {
           {/* Transaction Metrics */}
           <div className="mt-8 pt-6 border-t border-zinc-800/50">
             <p className="text-zinc-600 text-xs uppercase tracking-wider mb-4">Transactions Processed</p>
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-4 gap-8">
               <div className="text-center">
                 <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.totalArguments || 0)}</p>
                 <p className="text-zinc-500 text-sm mt-1">Bets Placed</p>
@@ -478,8 +478,12 @@ export default function Dashboard() {
                 <p className="text-zinc-500 text-sm mt-1">Debates Created</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.uniqueParticipants || 0)}</p>
-                <p className="text-zinc-500 text-sm mt-1">Registrations</p>
+                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.registeredUsers || 0)}</p>
+                <p className="text-zinc-500 text-sm mt-1">Registered Users</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-white tabular-nums">{formatNumber(stats?.registeredNotBet || 0)}</p>
+                <p className="text-zinc-500 text-sm mt-1">Not Yet Bet</p>
               </div>
             </div>
           </div>
