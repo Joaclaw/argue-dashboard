@@ -3,55 +3,104 @@ import { base } from 'viem/chains'
 
 // Contract addresses
 export const FACTORY_ADDRESS = '0x0692eC85325472Db274082165620829930f2c1F9' as const
+export const READER_ADDRESS = '0xeA28C45B8ee9DA8c4343D964dDA9faf5109d478A' as const
 export const ARGUE_TOKEN = '0x7FFd8f91b0b1b5c7A2E6c7c9efB8Be0A71885b07' as const
-export const LOCKED_ARGUE = '0x2FA376c24d5B7cfAC685d3BB6405f1af9Ea8EE40' as const
 
-// Factory ABI (read-only methods)
+// Factory ABI (minimal for getAllDebates)
 export const factoryAbi = [
-  { name: 'getActiveDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getResolvingDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getResolvedDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getUndeterminedDebatesCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getDebateCount', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { name: 'getAllDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
   { name: 'getActiveDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
-  { name: 'getResolvedDebates', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
-  { name: 'getUserStats', type: 'function', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'int256' }, { type: 'uint256' }] },
-  { name: 'getUserDebates', type: 'function', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'address[]' }] },
-  { name: 'getUserDebatesCount', type: 'function', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'uint256' }] },
 ] as const
 
-// Debate ABI (read-only methods)
-export const debateAbi = [
-  { 
-    name: 'getInfo', 
-    type: 'function', 
-    stateMutability: 'view', 
-    inputs: [], 
-    outputs: [
-      { type: 'address' },  // creator
-      { type: 'string' },   // debateStatement
-      { type: 'string' },   // description
-      { type: 'string' },   // sideAName
-      { type: 'string' },   // sideBName
-      { type: 'uint256' },  // creationDate
-      { type: 'uint256' },  // endDate
-      { type: 'bool' },     // isResolved
-      { type: 'bool' },     // isSideAWinner
-      { type: 'uint256' },  // totalLockedA
-      { type: 'uint256' },  // totalUnlockedA
-      { type: 'uint256' },  // totalLockedB
-      { type: 'uint256' },  // totalUnlockedB
-      { type: 'string' },   // winnerReasoning
-      { type: 'uint256' },  // totalContentBytes
-      { type: 'uint256' },  // maxTotalContentBytes
-      { type: 'uint256' },  // totalBounty
-    ] 
+// Reader contract ABI
+export const readerAbi = [
+  {
+    name: 'getPlatformStats',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{
+      type: 'tuple',
+      components: [
+        { name: 'totalDebates', type: 'uint256' },
+        { name: 'activeDebates', type: 'uint256' },
+        { name: 'resolvingDebates', type: 'uint256' },
+        { name: 'resolvedDebates', type: 'uint256' },
+        { name: 'undeterminedDebates', type: 'uint256' },
+      ]
+    }]
   },
-  { name: 'status', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] },
-  { name: 'totalBounty', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getArgumentsOnSideA', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'tuple[]', components: [{ name: 'author', type: 'address' }, { name: 'content', type: 'string' }, { name: 'timestamp', type: 'uint256' }, { name: 'amount', type: 'uint256' }] }] },
-  { name: 'getArgumentsOnSideB', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'tuple[]', components: [{ name: 'author', type: 'address' }, { name: 'content', type: 'string' }, { name: 'timestamp', type: 'uint256' }, { name: 'amount', type: 'uint256' }] }] },
+  {
+    name: 'getAggregateStats',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ type: 'address[]' }],
+    outputs: [
+      { name: 'totalVolume', type: 'uint256' },
+      { name: 'totalBounties', type: 'uint256' },
+      { name: 'totalArguments', type: 'uint256' },
+      { name: 'uniqueParticipants', type: 'uint256' },
+    ]
+  },
+  {
+    name: 'getDebateBasicInfoBatch',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ type: 'address[]' }],
+    outputs: [{
+      type: 'tuple[]',
+      components: [
+        { name: 'debateAddress', type: 'address' },
+        { name: 'creator', type: 'address' },
+        { name: 'endDate', type: 'uint256' },
+        { name: 'status', type: 'uint8' },
+        { name: 'totalSideA', type: 'uint256' },
+        { name: 'totalSideB', type: 'uint256' },
+        { name: 'totalBounty', type: 'uint256' },
+        { name: 'argumentCountA', type: 'uint256' },
+        { name: 'argumentCountB', type: 'uint256' },
+      ]
+    }]
+  },
+  {
+    name: 'getParticipantDetails',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ type: 'address[]' }, { type: 'uint256' }],
+    outputs: [{
+      type: 'tuple[]',
+      components: [
+        { name: 'participant', type: 'address' },
+        { name: 'totalArgumentsWritten', type: 'uint256' },
+        { name: 'totalAmountBet', type: 'uint256' },
+      ]
+    }]
+  },
+  {
+    name: 'getBatchAgentStats',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ type: 'address[]' }],
+    outputs: [{
+      type: 'tuple[]',
+      components: [
+        { name: 'agent', type: 'address' },
+        { name: 'totalWinnings', type: 'uint256' },
+        { name: 'totalBets', type: 'uint256' },
+        { name: 'debatesParticipated', type: 'uint256' },
+        { name: 'debatesWon', type: 'uint256' },
+        { name: 'netProfit', type: 'int256' },
+        { name: 'winRate', type: 'uint256' },
+      ]
+    }]
+  },
+  {
+    name: 'getDebateCreators',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ type: 'address[]' }],
+    outputs: [{ type: 'address[]' }]
+  },
 ] as const
 
 // Create client
@@ -68,23 +117,22 @@ export interface PlatformStats {
   resolvingDebates: number
   resolvedDebates: number
   undeterminedDebates: number
+  totalVolume: string
+  totalBounties: string
+  totalArguments: number
+  uniqueParticipants: number
 }
 
 export interface DebateInfo {
   address: Address
   creator: Address
-  statement: string
-  description: string
-  sideA: string
-  sideB: string
-  creationDate: Date
   endDate: Date
-  isResolved: boolean
-  isSideAWinner: boolean
+  status: number
   totalSideA: string
   totalSideB: string
   totalBounty: string
-  status: number
+  argumentCountA: number
+  argumentCountB: number
 }
 
 export interface AgentStats {
@@ -93,128 +141,118 @@ export interface AgentStats {
   totalBets: string
   debatesParticipated: number
   debatesWon: number
-  totalClaimed: string
   netProfit: string
   winRate: number
+  totalArgumentsWritten: number
+  totalAmountBet: string
 }
 
-// Fetch platform stats
-export async function getPlatformStats(): Promise<PlatformStats> {
-  const [
-    totalDebates,
-    activeDebates,
-    resolvingDebates,
-    resolvedDebates,
-    undeterminedDebates,
-  ] = await Promise.all([
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getDebateCount' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getActiveDebatesCount' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getResolvingDebatesCount' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getResolvedDebatesCount' }),
-    client.readContract({ address: FACTORY_ADDRESS, abi: factoryAbi, functionName: 'getUndeterminedDebatesCount' }),
-  ])
+// Fetch all data using the reader contract
+export async function fetchDashboardData() {
+  // Get platform stats
+  const platformStats = await client.readContract({
+    address: READER_ADDRESS,
+    abi: readerAbi,
+    functionName: 'getPlatformStats',
+  })
 
-  return {
-    totalDebates: Number(totalDebates),
-    activeDebates: Number(activeDebates),
-    resolvingDebates: Number(resolvingDebates),
-    resolvedDebates: Number(resolvedDebates),
-    undeterminedDebates: Number(undeterminedDebates),
-  }
-}
-
-// Fetch debate info
-export async function getDebateInfo(debateAddress: Address): Promise<DebateInfo> {
-  const [info, status] = await Promise.all([
-    client.readContract({ address: debateAddress, abi: debateAbi, functionName: 'getInfo' }),
-    client.readContract({ address: debateAddress, abi: debateAbi, functionName: 'status' }),
-  ])
-
-  const [
-    creator, statement, description, sideA, sideB,
-    creationDate, endDate, isResolved, isSideAWinner,
-    totalLockedA, totalUnlockedA, totalLockedB, totalUnlockedB,
-    , , , totalBounty
-  ] = info
-
-  return {
-    address: debateAddress,
-    creator: creator as Address,
-    statement,
-    description,
-    sideA,
-    sideB,
-    creationDate: new Date(Number(creationDate) * 1000),
-    endDate: new Date(Number(endDate) * 1000),
-    isResolved,
-    isSideAWinner,
-    totalSideA: formatUnits(totalLockedA + totalUnlockedA, 18),
-    totalSideB: formatUnits(totalLockedB + totalUnlockedB, 18),
-    totalBounty: formatUnits(totalBounty, 18),
-    status: Number(status),
-  }
-}
-
-// Fetch all active debates
-export async function getActiveDebatesList(): Promise<Address[]> {
-  return await client.readContract({
-    address: FACTORY_ADDRESS,
-    abi: factoryAbi,
-    functionName: 'getActiveDebates',
-  }) as Address[]
-}
-
-// Fetch all debates
-export async function getAllDebatesList(): Promise<Address[]> {
-  return await client.readContract({
+  // Get all debates
+  const allDebates = await client.readContract({
     address: FACTORY_ADDRESS,
     abi: factoryAbi,
     functionName: 'getAllDebates',
   }) as Address[]
-}
 
-// Get unique creators from debates
-export async function getUniqueCreators(debates: Address[]): Promise<Address[]> {
-  const creators = new Set<Address>()
-  
-  // Batch fetch in groups of 10
-  for (let i = 0; i < debates.length; i += 10) {
-    const batch = debates.slice(i, i + 10)
-    const infos = await Promise.all(
-      batch.map(addr => 
-        client.readContract({ address: addr, abi: debateAbi, functionName: 'getInfo' })
-      )
-    )
-    infos.forEach(info => creators.add(info[0] as Address))
-  }
-  
-  return Array.from(creators)
-}
+  // Limit to first 50 debates for performance
+  const debatesToQuery = allDebates.slice(0, 50)
 
-// Get agent stats
-export async function getAgentStats(address: Address): Promise<AgentStats> {
-  const stats = await client.readContract({
-    address: FACTORY_ADDRESS,
-    abi: factoryAbi,
-    functionName: 'getUserStats',
-    args: [address],
+  // Get aggregate stats
+  const [totalVolume, totalBounties, totalArguments, uniqueParticipants] = await client.readContract({
+    address: READER_ADDRESS,
+    abi: readerAbi,
+    functionName: 'getAggregateStats',
+    args: [debatesToQuery],
   })
 
-  const [totalWinnings, totalBets, debatesParticipated, debatesWon, totalClaimed, netProfit, winRate] = stats
+  // Get debate basic info
+  const debateInfos = await client.readContract({
+    address: READER_ADDRESS,
+    abi: readerAbi,
+    functionName: 'getDebateBasicInfoBatch',
+    args: [debatesToQuery],
+  })
 
-  return {
-    address,
-    totalWinnings: formatUnits(totalWinnings, 18),
-    totalBets: formatUnits(totalBets, 18),
-    debatesParticipated: Number(debatesParticipated),
-    debatesWon: Number(debatesWon),
-    totalClaimed: formatUnits(totalClaimed, 18),
-    netProfit: formatUnits(netProfit, 18),
-    winRate: Number(winRate) / 100, // basis points to percentage
+  // Get participant details (for argument counts)
+  const participantDetails = await client.readContract({
+    address: READER_ADDRESS,
+    abi: readerAbi,
+    functionName: 'getParticipantDetails',
+    args: [debatesToQuery, BigInt(100)],
+  })
+
+  // Get unique creators/participants for agent stats
+  const participants = participantDetails.map(p => p.participant as Address)
+  
+  // Get agent stats from factory
+  const agentStats = participants.length > 0 
+    ? await client.readContract({
+        address: READER_ADDRESS,
+        abi: readerAbi,
+        functionName: 'getBatchAgentStats',
+        args: [participants.slice(0, 50)],
+      })
+    : []
+
+  // Format data
+  const stats: PlatformStats = {
+    totalDebates: Number(platformStats.totalDebates),
+    activeDebates: Number(platformStats.activeDebates),
+    resolvingDebates: Number(platformStats.resolvingDebates),
+    resolvedDebates: Number(platformStats.resolvedDebates),
+    undeterminedDebates: Number(platformStats.undeterminedDebates),
+    totalVolume: formatUnits(totalVolume, 18),
+    totalBounties: formatUnits(totalBounties, 18),
+    totalArguments: Number(totalArguments),
+    uniqueParticipants: Number(uniqueParticipants),
   }
+
+  const debates: DebateInfo[] = debateInfos.map(d => ({
+    address: d.debateAddress as Address,
+    creator: d.creator as Address,
+    endDate: new Date(Number(d.endDate) * 1000),
+    status: Number(d.status),
+    totalSideA: formatUnits(d.totalSideA, 18),
+    totalSideB: formatUnits(d.totalSideB, 18),
+    totalBounty: formatUnits(d.totalBounty, 18),
+    argumentCountA: Number(d.argumentCountA),
+    argumentCountB: Number(d.argumentCountB),
+  }))
+
+  // Merge participant details with agent stats
+  const participantMap = new Map(participantDetails.map(p => [
+    (p.participant as Address).toLowerCase(),
+    { args: Number(p.totalArgumentsWritten), bet: formatUnits(p.totalAmountBet, 18) }
+  ]))
+
+  const agents: AgentStats[] = agentStats.map(a => {
+    const extra = participantMap.get((a.agent as Address).toLowerCase())
+    return {
+      address: a.agent as Address,
+      totalWinnings: formatUnits(a.totalWinnings, 18),
+      totalBets: formatUnits(a.totalBets, 18),
+      debatesParticipated: Number(a.debatesParticipated),
+      debatesWon: Number(a.debatesWon),
+      netProfit: formatUnits(a.netProfit, 18),
+      winRate: Number(a.winRate) / 100,
+      totalArgumentsWritten: extra?.args || 0,
+      totalAmountBet: extra?.bet || '0',
+    }
+  })
+
+  return { stats, debates, agents }
 }
 
-// Status label helper
+// Status helpers
 export function getStatusLabel(status: number): string {
   switch (status) {
     case 0: return 'Active'
@@ -225,7 +263,6 @@ export function getStatusLabel(status: number): string {
   }
 }
 
-// Status color helper
 export function getStatusColor(status: number): string {
   switch (status) {
     case 0: return 'bg-green-500'
